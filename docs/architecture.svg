@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#1d4ed8"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker>
+  </defs>
+  <rect width="760" height="460" fill="#f8fafc" rx="12"/>
+  <rect x="235" y="10" width="290" height="28" rx="8" fill="url(#hg)"/>
+  <text x="380" y="29" text-anchor="middle" fill="white" font-size="12" font-weight="bold">mcp-student-records — Student Information System</text>
+
+  <!-- agents -->
+  <rect x="40" y="48" width="680" height="40" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="380" y="62" text-anchor="middle" font-size="9" font-weight="bold" fill="#3730a3">Education Agents (clients of the SIS)</text>
+  <text x="380" y="78" text-anchor="middle" font-size="7" fill="#4338ca">Academic Policy Advisor · Adaptive Tutor · Learning Analytics · Parent Communication · Rubric Grading · Student Support</text>
+  <line x1="380" y1="88" x2="380" y2="104" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- tools -->
+  <rect x="30" y="108" width="700" height="110" rx="10" fill="white" stroke="#7c3aed" stroke-width="2"/>
+  <rect x="30" y="108" width="700" height="22" rx="10" fill="url(#hg)"/>
+  <text x="380" y="123" text-anchor="middle" fill="white" font-size="10" font-weight="bold">27 Tools — SIS platform</text>
+  <g font-size="7.3" font-weight="bold" fill="#3730a3" text-anchor="middle">
+    <text x="92" y="146">Students (5)</text>
+    <text x="230" y="146">Courses/Enroll (5)</text>
+    <text x="370" y="146">Grades (4)</text>
+    <text x="480" y="146">Attendance (2)</text>
+    <text x="600" y="146">Support (5)</text>
+  </g>
+  <g font-size="6.4" fill="#4338ca" text-anchor="middle">
+    <text x="92" y="161">find · get · status*</text>
+    <text x="92" y="171">accommodation* · log</text>
+    <text x="230" y="161">course · section</text>
+    <text x="230" y="171">enroll* · enrollments</text>
+    <text x="370" y="161">assignment · grade*</text>
+    <text x="370" y="171">grades · gradebook</text>
+    <text x="480" y="161">record* · summary</text>
+    <text x="600" y="161">case · note · status</text>
+  </g>
+  <text x="380" y="196" text-anchor="middle" font-size="7.3" font-weight="bold" fill="#3730a3">+ Guardians/Comms (4): add_guardian* · get · send_communication*(FERPA) · get_comms   ·   Records (2): transcript · analytics</text>
+  <text x="380" y="210" text-anchor="middle" font-size="7" fill="#9ca3af">weighted gradebook · rubric scoring · cumulative GPA · risk analytics</text>
+  <line x1="380" y1="218" x2="380" y2="234" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- FERPA -->
+  <rect x="90" y="238" width="580" height="58" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="380" y="256" text-anchor="middle" font-size="9" font-weight="bold" fill="#166534">FERPA Posture</text>
+  <text x="380" y="274" text-anchor="middle" font-size="7.5" fill="#15803d">every student-scoped op logged (accounting of disclosures) · actor required · minimal PII</text>
+  <text x="380" y="288" text-anchor="middle" font-size="7.5" fill="#16a34a">guardian comms consent-gated · sensitive writes gated · send_communication = external_write</text>
+  <line x1="380" y1="296" x2="380" y2="312" stroke="#64748b" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- store -->
+  <rect x="100" y="316" width="560" height="58" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="380" y="334" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#1e40af">StudentStore (in-memory, Mutex-guarded · fictitious data)</text>
+  <text x="380" y="352" text-anchor="middle" font-size="7.5" fill="#1d4ed8">students · courses/sections · enrollments · assignments/grades · attendance · cases · guardians/comms · access log</text>
+  <text x="380" y="366" text-anchor="middle" font-size="7" fill="#9ca3af">integration scaffold — back with a real SIS of record + RBAC in production</text>
+</svg>
