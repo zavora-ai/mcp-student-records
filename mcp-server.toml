@@ -1,6 +1,6 @@
 server_id = "mcp_student_records"
 display_name = "Student Records (SIS)"
-version = "1.0.0"
+version = "1.1.0"
 domain = "education"
 sdk_version = "0.1.0"
 risk_level = "high"
@@ -198,3 +198,143 @@ description = "Learning-analytics standing: grade average, attendance, risk (FER
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
+
+# ── v1.1: competency / mastery ──────────────────────────────────────────────
+
+[[tools]]
+name = "add_competency"
+description = "Add a learning competency/standard with optional prerequisites"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "list_competencies"
+description = "List competencies, optionally by subject"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "record_mastery_evidence"
+description = "Record a mastery evidence observation (updates mastery level)"
+risk_class = "internal_write"
+requires_approval = true
+credential_bindings = []
+
+[[tools]]
+name = "get_mastery"
+description = "Get a student's competency mastery (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "learning_path"
+description = "Adaptive learning path: next competencies ready to learn (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+# ── v1.1: degree audit / standing / holds ───────────────────────────────────
+
+[[tools]]
+name = "add_grad_requirement"
+description = "Add a graduation/program requirement"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "list_grad_requirements"
+description = "List graduation requirements for a program"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "degree_audit"
+description = "Earned vs. required credits with progress and on-track flag (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "academic_standing"
+description = "Academic standing derived from GPA (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "place_hold"
+description = "Place a registration/transcript/financial hold on a student"
+risk_class = "internal_write"
+requires_approval = true
+credential_bindings = []
+
+[[tools]]
+name = "release_hold"
+description = "Release a hold"
+risk_class = "internal_write"
+requires_approval = true
+credential_bindings = []
+
+[[tools]]
+name = "get_holds"
+description = "List holds on a student (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+# ── v1.1: early warning / interventions ─────────────────────────────────────
+
+[[tools]]
+name = "raise_flag"
+description = "Raise an early-warning flag on a student"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "set_flag_status"
+description = "Set an early-warning flag's status"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "get_flags"
+description = "List early-warning flags on a student (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "evaluate_early_warning"
+description = "Auto-evaluate grades/attendance/mastery and raise flags past threshold"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "assign_intervention"
+description = "Assign an MTSS/RTI intervention (tier 1–3)"
+risk_class = "internal_write"
+requires_approval = true
+credential_bindings = []
+
+[[tools]]
+name = "end_intervention"
+description = "End an active intervention"
+risk_class = "internal_write"
+requires_approval = false
+credential_bindings = []
+
+[[tools]]
+name = "get_interventions"
+description = "List a student's interventions (FERPA read)"
+risk_class = "read_only"
+requires_approval = false
+credential_bindings = []
+

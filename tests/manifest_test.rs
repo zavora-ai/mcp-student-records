@@ -15,7 +15,16 @@ fn manifest_parses_and_validates() {
     assert!(m.validate().is_empty(), "validation errors: {:?}", m.validate());
     assert_eq!(m.server_id, "mcp_student_records");
     assert_eq!(m.domain, "education");
-    assert_eq!(m.tools.len(), 27, "expected 27 declared tools");
+    assert_eq!(m.tools.len(), 46, "expected 46 declared tools");
+}
+
+#[test]
+fn v11_gated_writes() {
+    let m = manifest();
+    for name in ["record_mastery_evidence", "place_hold", "release_hold", "assign_intervention"] {
+        let t = m.tools.iter().find(|t| t.name == name).unwrap_or_else(|| panic!("{name} present"));
+        assert!(t.requires_approval, "{name} must require approval");
+    }
 }
 
 #[test]

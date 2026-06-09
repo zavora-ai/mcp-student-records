@@ -5,7 +5,7 @@
 [![ADK-Rust Enterprise](https://img.shields.io/badge/ADK--Rust-Enterprise-purple.svg)](https://enterprise.adk-rust.com)
 [![Registry Ready](https://img.shields.io/badge/ADK_Registry-Ready-green.svg)](https://www.zavora.ai)
 
-A full Student Information System (SIS) for [ADK-Rust Enterprise](https://enterprise.adk-rust.com) education agents. 27 MCP tools covering students, courses & enrollment, grades & rubric scoring, attendance, support cases, guardians & communications, transcripts, and learning analytics — with **FERPA access logging on every student-scoped operation**.
+A full Student Information System (SIS) for [ADK-Rust Enterprise](https://enterprise.adk-rust.com) education agents. 46 MCP tools covering students, courses & enrollment, grades & rubric scoring, attendance, support cases, guardians & communications, transcripts, and learning analytics — with **FERPA access logging on every student-scoped operation**.
 
 ## A platform, not a point solution
 
@@ -58,6 +58,21 @@ This is modeled as a general SIS (à la Banner / PowerSchool / Workday Student),
 
 ### Records & Analytics (2)
 `get_transcript` · `analytics`
+
+### Competency & Mastery — Adaptive Tutor (5)
+`add_competency` · `list_competencies` · `record_mastery_evidence` (gated) · `get_mastery` · `learning_path`
+
+Mastery is tracked per learning standard (with prerequisites). `learning_path` recommends the competencies a student is **ready to learn next** — not yet proficient, prerequisites met — and what's blocked, giving an Adaptive Tutor real mastery data instead of letter grades.
+
+### Degree Audit & Standing — Academic Policy Advisor (7)
+`add_grad_requirement` · `list_grad_requirements` · `degree_audit` · `academic_standing` · `place_hold` (gated) · `release_hold` (gated) · `get_holds`
+
+`degree_audit` reports earned-vs-required credits per subject for the student's program (progress %, on-track flag); `academic_standing` derives honor-roll/probation from GPA; holds gate registration/transcript/financial actions.
+
+### Early Warning & Interventions — Student Support / Learning Analytics (7)
+`raise_flag` · `set_flag_status` · `get_flags` · `evaluate_early_warning` · `assign_intervention` (gated) · `end_intervention` · `get_interventions`
+
+`evaluate_early_warning` auto-raises flags from grades, attendance, and mastery; interventions follow MTSS/RTI tiers (1–3).
 
 ## Example
 
@@ -124,7 +139,7 @@ cargo build --release
 ```toml
 server_id = "mcp_student_records"
 display_name = "Student Records (SIS)"
-version = "1.0.0"
+version = "1.1.0"
 domain = "education"
 risk_level = "high"
 writes_allowed = "gated"

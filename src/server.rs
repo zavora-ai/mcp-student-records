@@ -56,6 +56,44 @@ pub struct AddGuardianInput { pub actor: String, pub student_id: String, pub nam
 pub struct SendCommInput { pub student_id: String, pub guardian_id: String, #[serde(default = "dchannel")] pub channel: String, pub subject: String, pub body: String, #[serde(default = "dactor")] pub sent_by: String }
 fn dchannel() -> String { "email".into() }
 
+// v1.1 inputs
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct AddCompetencyInput { pub code: String, #[serde(default)] pub subject: String, pub description: String, #[serde(default)] pub prerequisites: Vec<String> }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct ListCompetenciesInput { pub subject: Option<String> }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct MasteryEvidenceInput { pub student_id: String, pub competency_id: String, pub score: f64, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct MasteryScopeInput { pub actor: String, pub student_id: String, pub subject: Option<String> }
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct AddGradReqInput { pub program: String, pub name: String, pub subject: String, pub required_credits: f64 }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct ProgramInput { pub program: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct PlaceHoldInput { pub student_id: String, #[serde(default = "dhold")] pub kind: String, pub reason: String, #[serde(default = "dactor")] pub placed_by: String }
+fn dhold() -> String { "registration".into() }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct HoldIdInput { pub hold_id: String, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct HoldsScopeInput { pub actor: String, pub student_id: String, #[serde(default)] pub active_only: bool }
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct RaiseFlagInput { pub student_id: String, #[serde(default = "dcat")] pub category: String, #[serde(default = "dsev")] pub severity: String, pub detail: String, #[serde(default = "dactor")] pub raised_by: String }
+fn dsev() -> String { "medium".into() }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct FlagStatusInput { pub flag_id: String, pub status: FlagStatus, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct FlagsScopeInput { pub actor: String, pub student_id: String, #[serde(default)] pub open_only: bool }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct StudentActorInput { pub student_id: String, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct AssignInterventionInput { pub student_id: String, pub tier: u8, pub focus: String, pub strategy: String, pub assigned_to: Option<String>, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct InterventionIdInput { pub intervention_id: String, #[serde(default = "dactor")] pub actor: String }
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+pub struct InterventionsScopeInput { pub actor: String, pub student_id: String, #[serde(default)] pub active_only: bool }
+
 // ── server ──────────────────────────────────────────────────────────────
 
 #[derive(Clone)]
@@ -237,6 +275,133 @@ impl StudentServer {
     fn analytics(&self, Parameters(i): Parameters<StudentScopeInput>) -> String {
         match self.store.analytics(&i.actor, &i.student_id) {
             Some(v) => serde_json::to_string_pretty(&v).unwrap(), None => format!("Student not found: {}", i.student_id) }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // v1.1 — competency / mastery (Adaptive Tutor)
+    // ═══════════════════════════════════════════════════════════════════
+
+    #[tool(description = "Add a learning competency/standard (with optional prerequisite competency ids for sequencing).")]
+    fn add_competency(&self, Parameters(i): Parameters<AddCompetencyInput>) -> String {
+        let c = self.store.add_competency(&i.code, &i.subject, &i.description, i.prerequisites);
+        serde_json::to_string_pretty(&serde_json::json!({"competency_id": c.id, "code": c.code})).unwrap()
+    }
+
+    #[tool(description = "List competencies, optionally by subject.")]
+    fn list_competencies(&self, Parameters(i): Parameters<ListCompetenciesInput>) -> String {
+        let c = self.store.list_competencies(i.subject.as_deref());
+        serde_json::to_string_pretty(&serde_json::json!({"count": c.len(), "competencies": c})).unwrap()
+    }
+
+    #[tool(description = "Record a mastery evidence observation (0–1 score) for a student on a competency; updates the rolling mastery level. Gated. FERPA-logged.")]
+    fn record_mastery_evidence(&self, Parameters(i): Parameters<MasteryEvidenceInput>) -> String {
+        match self.store.record_mastery_evidence(&i.student_id, &i.competency_id, i.score, &i.actor) {
+            Ok(m) => serde_json::to_string_pretty(&serde_json::json!({"competency_id": m.competency_id, "level": m.level, "score": m.score, "evidence": m.evidence_count})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "Get a student's competency mastery (level + score per competency), optionally by subject. FERPA read — logged.")]
+    fn get_mastery(&self, Parameters(i): Parameters<MasteryScopeInput>) -> String {
+        let m = self.store.mastery_for(&i.actor, &i.student_id, i.subject.as_deref());
+        serde_json::to_string_pretty(&serde_json::json!({"student_id": i.student_id, "count": m.len(), "mastery": m})).unwrap()
+    }
+
+    #[tool(description = "Adaptive learning path: competencies the student is ready to learn next (not yet proficient, prerequisites met) and those blocked on prerequisites. FERPA read — logged.")]
+    fn learning_path(&self, Parameters(i): Parameters<MasteryScopeInput>) -> String {
+        serde_json::to_string_pretty(&self.store.learning_path(&i.actor, &i.student_id, i.subject.as_deref())).unwrap()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // v1.1 — degree audit / standing / holds (Academic Policy Advisor)
+    // ═══════════════════════════════════════════════════════════════════
+
+    #[tool(description = "Add a graduation/program requirement (credits in a subject area).")]
+    fn add_grad_requirement(&self, Parameters(i): Parameters<AddGradReqInput>) -> String {
+        let r = self.store.add_grad_requirement(&i.program, &i.name, &i.subject, i.required_credits);
+        serde_json::to_string_pretty(&serde_json::json!({"requirement_id": r.id, "program": r.program, "subject": r.subject})).unwrap()
+    }
+
+    #[tool(description = "List graduation requirements for a program.")]
+    fn list_grad_requirements(&self, Parameters(i): Parameters<ProgramInput>) -> String {
+        let r = self.store.list_grad_requirements(&i.program);
+        serde_json::to_string_pretty(&serde_json::json!({"count": r.len(), "requirements": r})).unwrap()
+    }
+
+    #[tool(description = "Degree audit: a student's earned vs. required credits per subject for their program, with progress % and on-track flag. FERPA read — logged.")]
+    fn degree_audit(&self, Parameters(i): Parameters<StudentScopeInput>) -> String {
+        match self.store.degree_audit(&i.actor, &i.student_id) {
+            Some(v) => serde_json::to_string_pretty(&v).unwrap(), None => format!("Student not found: {}", i.student_id) }
+    }
+
+    #[tool(description = "Academic standing (honor_roll/good_standing/academic_warning/academic_probation) derived from GPA. FERPA read — logged.")]
+    fn academic_standing(&self, Parameters(i): Parameters<StudentScopeInput>) -> String {
+        match self.store.academic_standing(&i.actor, &i.student_id) {
+            Some(v) => serde_json::to_string_pretty(&v).unwrap(), None => format!("Student not found: {}", i.student_id) }
+    }
+
+    #[tool(description = "Place a hold on a student account (registration/transcript/financial). Gated. FERPA-logged.")]
+    fn place_hold(&self, Parameters(i): Parameters<PlaceHoldInput>) -> String {
+        match self.store.place_hold(&i.student_id, &i.kind, &i.reason, &i.placed_by) {
+            Ok(h) => serde_json::to_string_pretty(&serde_json::json!({"hold_id": h.id, "kind": h.kind, "active": h.active})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "Release a hold. Gated. FERPA-logged.")]
+    fn release_hold(&self, Parameters(i): Parameters<HoldIdInput>) -> String {
+        match self.store.release_hold(&i.hold_id, &i.actor) {
+            Ok(h) => serde_json::to_string_pretty(&serde_json::json!({"hold_id": h.id, "active": h.active, "released_at": h.released_at})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "List holds on a student (set active_only=true for current holds). FERPA read — logged.")]
+    fn get_holds(&self, Parameters(i): Parameters<HoldsScopeInput>) -> String {
+        let h = self.store.holds_for(&i.actor, &i.student_id, i.active_only);
+        serde_json::to_string_pretty(&serde_json::json!({"count": h.len(), "holds": h})).unwrap()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // v1.1 — early warning / interventions (Student Support / Analytics)
+    // ═══════════════════════════════════════════════════════════════════
+
+    #[tool(description = "Raise an early-warning flag on a student (category/severity/detail). FERPA-logged.")]
+    fn raise_flag(&self, Parameters(i): Parameters<RaiseFlagInput>) -> String {
+        match self.store.raise_flag(&i.student_id, &i.category, &i.severity, &i.detail, &i.raised_by) {
+            Ok(f) => serde_json::to_string_pretty(&serde_json::json!({"flag_id": f.id, "category": f.category, "severity": f.severity, "status": f.status})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "Set an early-warning flag's status (open/acknowledged/resolved/dismissed).")]
+    fn set_flag_status(&self, Parameters(i): Parameters<FlagStatusInput>) -> String {
+        match self.store.set_flag_status(&i.flag_id, i.status, &i.actor) {
+            Ok(f) => serde_json::to_string_pretty(&serde_json::json!({"flag_id": f.id, "status": f.status})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "List early-warning flags on a student (set open_only=true for active alerts). FERPA read — logged.")]
+    fn get_flags(&self, Parameters(i): Parameters<FlagsScopeInput>) -> String {
+        let f = self.store.flags_for(&i.actor, &i.student_id, i.open_only);
+        serde_json::to_string_pretty(&serde_json::json!({"count": f.len(), "flags": f})).unwrap()
+    }
+
+    #[tool(description = "Auto-evaluate early-warning signals (grades, attendance, mastery) and raise flags past threshold. Returns the flags raised. FERPA-logged.")]
+    fn evaluate_early_warning(&self, Parameters(i): Parameters<StudentActorInput>) -> String {
+        match self.store.evaluate_early_warning(&i.student_id, &i.actor) {
+            Ok(flags) => serde_json::to_string_pretty(&serde_json::json!({"student_id": i.student_id, "flags_raised": flags.len(), "flags": flags.iter().map(|f| serde_json::json!({"id": f.id, "category": f.category, "severity": f.severity, "detail": f.detail})).collect::<Vec<_>>()})).unwrap(),
+            Err(e) => format!("Error: {e}"),
+        }
+    }
+
+    #[tool(description = "Assign an MTSS/RTI intervention (tier 1–3) with a focus and strategy. Gated. FERPA-logged.")]
+    fn assign_intervention(&self, Parameters(i): Parameters<AssignInterventionInput>) -> String {
+        match self.store.assign_intervention(&i.student_id, i.tier, &i.focus, &i.strategy, i.assigned_to, &i.actor) {
+            Ok(iv) => serde_json::to_string_pretty(&serde_json::json!({"intervention_id": iv.id, "tier": iv.tier, "focus": iv.focus})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "End an active intervention. FERPA-logged.")]
+    fn end_intervention(&self, Parameters(i): Parameters<InterventionIdInput>) -> String {
+        match self.store.end_intervention(&i.intervention_id, &i.actor) {
+            Ok(iv) => serde_json::to_string_pretty(&serde_json::json!({"intervention_id": iv.id, "active": iv.active, "ended_at": iv.ended_at})).unwrap(), Err(e) => format!("Error: {e}") }
+    }
+
+    #[tool(description = "List a student's interventions (set active_only=true for current ones). FERPA read — logged.")]
+    fn get_interventions(&self, Parameters(i): Parameters<InterventionsScopeInput>) -> String {
+        let iv = self.store.interventions_for(&i.actor, &i.student_id, i.active_only);
+        serde_json::to_string_pretty(&serde_json::json!({"count": iv.len(), "interventions": iv})).unwrap()
     }
 }
 
