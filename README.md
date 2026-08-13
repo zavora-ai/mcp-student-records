@@ -139,7 +139,7 @@ cargo build --release
 ```toml
 server_id = "mcp_student_records"
 display_name = "Student Records (SIS)"
-version = "1.1.0"
+version = "1.2.0"
 domain = "education"
 risk_level = "high"
 writes_allowed = "gated"
