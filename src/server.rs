@@ -99,7 +99,7 @@ pub struct InterventionsScopeInput { pub actor: String, pub student_id: String, 
 #[derive(Clone)]
 pub struct StudentServer { pub store: Arc<StudentStore> }
 
-#[tool_router(server_handler)]
+#[tool_router]
 impl StudentServer {
     // ── students ────────────────────────────────────────────────────────────
 
@@ -410,4 +410,11 @@ impl HealthCheck for StudentServer {
     async fn check_health(&self) -> HealthStatus {
         HealthStatus { healthy: true, message: Some("operational".into()), latency_ms: Some(1) }
     }
+}
+
+adk_mcp_sdk::mcp_2026_server! {
+    server: StudentServer,
+    task_tools: [],
+    approval_tools: ["set_student_status", "add_accommodation", "create_course", "create_section", "enroll", "create_assignment", "record_grade", "record_attendance", "open_support_case", "add_case_note", "set_case_status", "add_guardian", "send_communication", "add_competency", "record_mastery_evidence", "add_grad_requirement", "place_hold", "release_hold", "raise_flag", "set_flag_status", "evaluate_early_warning", "assign_intervention", "end_intervention"],
+    cache_ttl_ms: 60_000,
 }

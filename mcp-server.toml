@@ -1,340 +1,333 @@
 server_id = "mcp_student_records"
-display_name = "Student Records (SIS)"
+display_name = "Student Records"
 version = "1.1.0"
 domain = "education"
-sdk_version = "0.1.0"
+sdk_version = "0.2.0"
 risk_level = "high"
 writes_allowed = "gated"
 transports = ["stdio"]
 credentials = []
-governance_gates = []
+governance_gates = ["mrtr_approval"]
 environments = ["development", "staging", "production"]
 
 [[tools]]
 name = "find_students"
-description = "Find students by SIS id, name, or grade level (FERPA-logged)"
+description = "Find students by SIS id, name, or grade level. PHI/FERPA read — logged to the access log."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "get_student"
-description = "Get a student's record (FERPA read)"
+description = "Get a student's record (demographics, accommodations). FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "set_student_status"
-description = "Set a student's enrollment status"
+description = "Set a student's enrollment status. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "add_accommodation"
-description = "Add an IEP/504/ELL accommodation to a student"
+description = "Add an accommodation (IEP/504/ELL) to a student. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_access_log"
-description = "Get the FERPA access log (accounting of disclosures) for a student"
+description = "Get the FERPA access log (accounting of disclosures) for a student."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "create_course"
-description = "Create a catalog course"
+description = "Create a course in the catalog."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "list_courses"
-description = "List catalog courses"
+description = "List catalog courses."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "create_section"
-description = "Create a course section with grade-category weights"
+description = "Create a course section (offering) for a term, with grade-category weights e.g. {\"homework\":0.3,\"exams\":0.7}."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "enroll"
-description = "Enroll a student in a section"
+description = "Enroll a student in a section. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_enrollments"
-description = "List a student's enrollments (FERPA read)"
+description = "List a student's enrollments. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "create_assignment"
-description = "Create an assignment in a section"
+description = "Create an assignment in a section (category maps to the section's grade weights)."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "record_grade"
-description = "Record a grade (with optional rubric) for a student"
+description = "Record a grade for a student on an assignment. If a rubric is given, the score is the sum of awarded criterion points (rubric grading). Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_grades"
-description = "Get all grades for a student (FERPA read)"
+description = "Get all grades for a student. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "gradebook"
-description = "Compute a student's weighted course grade for a section (FERPA read)"
+description = "Compute a student's weighted course grade (gradebook) for a section. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "record_attendance"
-description = "Record an attendance entry for a student"
+description = "Record an attendance entry (present/absent/tardy/excused) for a student. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "attendance_summary"
-description = "Get a student's attendance summary and rate (FERPA read)"
+description = "Get a student's attendance summary and rate. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "open_support_case"
-description = "Open a student support case"
+description = "Open a student support case (academic/attendance/behavioral/wellbeing). FERPA-logged."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_support_case"
-description = "Get a support case with notes"
+description = "Get a support case with its notes."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "add_case_note"
-description = "Add a note to a support case"
+description = "Add a note to a support case. FERPA-logged."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "set_case_status"
-description = "Set a support case status"
+description = "Set a support case status (open/in_progress/resolved/closed). Gated."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_support_cases"
-description = "List a student's support cases (FERPA read)"
+description = "List a student's support cases. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "add_guardian"
-description = "Add a guardian to a student (consent flag for FERPA disclosures)"
+description = "Add a guardian to a student. Set consent_on_file=true to authorize record disclosures (FERPA). Gated."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_guardians"
-description = "List a student's guardians (FERPA read)"
+description = "List a student's guardians. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "send_communication"
-description = "Send a communication to a guardian (FERPA-gated on consent)"
+description = "Send a communication to a guardian. FERPA-gated: the guardian must belong to the student and have consent on file. Gated; requires approval in production."
 risk_class = "external_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_communications"
-description = "List communications about a student (FERPA read)"
+description = "List communications sent about a student. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "get_transcript"
-description = "Get a student's transcript and cumulative GPA (FERPA read)"
+description = "Get a student's transcript: completed courses, credits, and cumulative GPA. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "analytics"
-description = "Learning-analytics standing: grade average, attendance, risk (FERPA read)"
+description = "Learning-analytics standing: grade average, attendance rate, risk level, and recommendation. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
-# ── v1.1: competency / mastery ──────────────────────────────────────────────
-
 [[tools]]
 name = "add_competency"
-description = "Add a learning competency/standard with optional prerequisites"
+description = "Add a learning competency/standard (with optional prerequisite competency ids for sequencing)."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "list_competencies"
-description = "List competencies, optionally by subject"
+description = "List competencies, optionally by subject."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "record_mastery_evidence"
-description = "Record a mastery evidence observation (updates mastery level)"
+description = "Record a mastery evidence observation (0–1 score) for a student on a competency; updates the rolling mastery level. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_mastery"
-description = "Get a student's competency mastery (FERPA read)"
+description = "Get a student's competency mastery (level + score per competency), optionally by subject. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "learning_path"
-description = "Adaptive learning path: next competencies ready to learn (FERPA read)"
+description = "Adaptive learning path: competencies the student is ready to learn next (not yet proficient, prerequisites met) and those blocked on prerequisites. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
-# ── v1.1: degree audit / standing / holds ───────────────────────────────────
-
 [[tools]]
 name = "add_grad_requirement"
-description = "Add a graduation/program requirement"
+description = "Add a graduation/program requirement (credits in a subject area)."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "list_grad_requirements"
-description = "List graduation requirements for a program"
+description = "List graduation requirements for a program."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "degree_audit"
-description = "Earned vs. required credits with progress and on-track flag (FERPA read)"
+description = "Degree audit: a student's earned vs. required credits per subject for their program, with progress % and on-track flag. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "academic_standing"
-description = "Academic standing derived from GPA (FERPA read)"
+description = "Academic standing (honor_roll/good_standing/academic_warning/academic_probation) derived from GPA. FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "place_hold"
-description = "Place a registration/transcript/financial hold on a student"
+description = "Place a hold on a student account (registration/transcript/financial). Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "release_hold"
-description = "Release a hold"
+description = "Release a hold. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_holds"
-description = "List holds on a student (FERPA read)"
+description = "List holds on a student (set active_only=true for current holds). FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
-# ── v1.1: early warning / interventions ─────────────────────────────────────
-
 [[tools]]
 name = "raise_flag"
-description = "Raise an early-warning flag on a student"
+description = "Raise an early-warning flag on a student (category/severity/detail). FERPA-logged."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "set_flag_status"
-description = "Set an early-warning flag's status"
+description = "Set an early-warning flag's status (open/acknowledged/resolved/dismissed)."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_flags"
-description = "List early-warning flags on a student (FERPA read)"
+description = "List early-warning flags on a student (set open_only=true for active alerts). FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
 
 [[tools]]
 name = "evaluate_early_warning"
-description = "Auto-evaluate grades/attendance/mastery and raise flags past threshold"
+description = "Auto-evaluate early-warning signals (grades, attendance, mastery) and raise flags past threshold. Returns the flags raised. FERPA-logged."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "assign_intervention"
-description = "Assign an MTSS/RTI intervention (tier 1–3)"
+description = "Assign an MTSS/RTI intervention (tier 1–3) with a focus and strategy. Gated. FERPA-logged."
 risk_class = "internal_write"
 requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "end_intervention"
-description = "End an active intervention"
+description = "End an active intervention. FERPA-logged."
 risk_class = "internal_write"
-requires_approval = false
+requires_approval = true
 credential_bindings = []
 
 [[tools]]
 name = "get_interventions"
-description = "List a student's interventions (FERPA read)"
+description = "List a student's interventions (set active_only=true for current ones). FERPA read — logged."
 risk_class = "read_only"
 requires_approval = false
 credential_bindings = []
-
